@@ -8,8 +8,11 @@ Created on Sat Jul  9 18:46:31 2022
 @author: Yew Choon Min
 """
 
+from asyncio.windows_events import NULL
+from turtle import hideturtle
 import xlsxwriter
 import datetime
+import re
 
 PartMaster_Header = "Company,PartNum,Part Description,MfrPartNum_c,TypeCode," \
                      "UOMClassID,IUM,SalesUM,PUM,ProdCode,ClassID,PartBrand_c,Commodity Code," \
@@ -96,10 +99,21 @@ def User_Input():
             part_desc: New part desciption
             ECO: New part ECO
     """
-    partnum = input("Please Input part number(eg:GI130-1046): ")    #Prompt user for part number, part description and ECO number
-    part_desc = input("Please input part description in CAPITAL LETTERS: ")
-    ECO = input("Please input ECO Number: ")
-    New_Part = Part_Data(partnum,part_desc,ECO) #Create new object based on user input
+    partnum, part_desc, ECO = None, None, None
+    partnum_re = re.compile("^GI\d{3}-\d{4}$")
+    ECO_re = re.compile("\d{12}$")
+    
+    while(partnum == None or not partnum_re.match(partnum)):
+        partnum = input("Please Input part number(eg:GI130-1046): ")
+    while(part_desc == None):
+        part_desc = input("Please input part description in CAPITAL LETTERS: ")
+    while(ECO == None or not ECO_re.match(ECO)):
+        ECO = input("Please input ECO Number: ")
+        #Prompt user for part number, part description and ECO number
+        
+    New_Part = Part_Data(partnum,part_desc,ECO) 
+    #Create new object based on user input
+    
     return New_Part
     
 def Print_xlsx(file):
@@ -179,19 +193,22 @@ def Attach_hyperlink(types):
 
 date_tomorrow = datetime.datetime.now() + datetime.timedelta(days=1)    #Set tomorrow's date as ERP update date
 
-New_Part = User_Input()  #Ask user to enter new part datas
 
-#Init each file data with respective name, file name, part name, header data and part data
-PartMaster_File = File_Data(0,"1.Part Master.xlsx",PartMaster_Header,PartMaster_Data) 
-PartRev_File = File_Data(1,"2.Part Revision.xlsx",PartRev_Header,PartRev_Data) 
-PartRevAttach_File = File_Data(2,"3.Part Revision with attachment.xlsx",PartRevAttach_Header,PartRevAttach_Data) 
-BOO_File = File_Data(3,"4.BOO.xlsx",BOO_Header,BOO_Data) 
-BOM_File = File_Data(4,"5.BOM.xlsx",BOM_Header,BOM_Data) 
 
-Print_xlsx(PartMaster_File)
-Print_xlsx(PartRev_File)
-Print_xlsx(PartRevAttach_File)
-Print_xlsx(BOO_File)
-Print_xlsx(BOM_File)
 
+if __name__ == '__main__' :
+    New_Part = User_Input()  #Ask user to enter new part datas
+
+    #Init each file data with respective name, file name, part name, header data and part data
+    PartMaster_File = File_Data(0,"1.Part Master.xlsx",PartMaster_Header,PartMaster_Data) 
+    PartRev_File = File_Data(1,"2.Part Revision.xlsx",PartRev_Header,PartRev_Data) 
+    PartRevAttach_File = File_Data(2,"3.Part Revision with attachment.xlsx",PartRevAttach_Header,PartRevAttach_Data) 
+    BOO_File = File_Data(3,"4.BOO.xlsx",BOO_Header,BOO_Data) 
+    BOM_File = File_Data(4,"5.BOM.xlsx",BOM_Header,BOM_Data) 
+
+    Print_xlsx(PartMaster_File)
+    Print_xlsx(PartRev_File)
+    Print_xlsx(PartRevAttach_File)
+    Print_xlsx(BOO_File)
+    Print_xlsx(BOM_File)
 
